@@ -21,7 +21,7 @@ app.post('/download', (req, res) => {
     fs.mkdirSync(folderPath, { recursive: true });
 
     const outputPath = path.join(folderPath, '%(title)s.%(ext)s');
-    const formatSelector = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]';
+    const formatSelector = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]+best[ext=mp4/best[ext=mp4]';
 
     exec(`yt-dlp -f "${formatSelector}" -o "${outputPath}" ${url}`, (err, stdout, stderr) => {
       if (err) return res.status(500).json({ error: stderr });
