@@ -1,0 +1,15 @@
+# Node modules
+node_modules/
+
+# Downloaded video/audio folders
+downloads/
+
+# Logs
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# dotenv if you're using it
+.env

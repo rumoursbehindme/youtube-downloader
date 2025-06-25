@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Downloader</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 60px;
+    }
+    h1 {
+      color: #00ffae;
+      margin-bottom: 20px;
+    }
+    input {
+      width: 400px;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #00ffae;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00e69c;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #aaa;
+    }
+    #thumbnail {
+      margin-top: 30px;
+      width: 640px;
+      height: auto;
+      border-radius: 10px;
+      display: none;
+      box-shadow: 0 0 20px rgba(0, 255, 174, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <h1>🔥 YouTube Downloader</h1>
+  <input type="text" id="url" placeholder="Paste YouTube video URL here" oninput="updateThumbnail()" />
+  <img id="thumbnail" src="" alt="Video Thumbnail" />
+  <button onclick="download()">Download Best MP4</button>
+  <div id="status"></div>
+
+  <script>
+    function extractVideoID(url) {
+      const match = url.match(/(?:v=|\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return match ? match[1] : null;
+    }
+
+    function updateThumbnail() {
+      const url = document.getElementById('url').value;
+      const videoId = extractVideoID(url);
+      const thumb = document.getElementById('thumbnail');
+
+      if (videoId) {
+        thumb.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+        thumb.style.display = 'block';
+      } else {
+        thumb.style.display = 'none';
+      }
+    }
+
+    async function download() {
+      const url = document.getElementById('url').value;
+      const status = document.getElementById('status');
+      if (!url) {
+        status.textContent = 'Please enter a URL.';
+        return;
+      }
+
+      status.textContent = 'Downloading... Please wait ⏳';
+
+      try {
+        const res = await fetch('/download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await res.json();
+        status.textContent = data.message || data.error;
+      } catch (err) {
+        status.textContent = 'Something went wrong.';
+      }
+    }
+  </script>
+</body>
+</html>
