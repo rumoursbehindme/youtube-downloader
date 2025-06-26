@@ -6,6 +6,7 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ffmpegDir = path.resolve(__dirname, 'ffmpeg/bin');
+const ytdlpPath = path.resolve(__dirname, 'yt-dlp');
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -17,7 +18,7 @@ app.post('/download', (req, res) => {
   const { url, format_id } = req.body;
   if (!url || !format_id) return res.status(400).json({ error: 'Missing params' });
 
-  exec(`yt-dlp --get-title --user-agent "Mozilla/5.0" "${url}"`, (err, stdout) => {
+  exec(`python "${ytdlpPath}" --get-title --user-agent "Mozilla/5.0" "${url}"`, (err, stdout) => {
     if (err) {
       console.error('❌ Error fetching title:', err);
       return res.status(500).json({ error: '❌ Failed to get video title' });
@@ -32,7 +33,7 @@ app.post('/download', (req, res) => {
 
     fs.mkdirSync(path.dirname(tempFile), { recursive: true });
 
-    const command = `yt-dlp -f "${format_id}" --ffmpeg-location "${ffmpegDir}" --user-agent "Mozilla/5.0" ${audioOptions} -o "${tempFile}" "${url}"`;
+    const command = `python "${ytdlpPath}" -f "${format_id}" --ffmpeg-location "${ffmpegDir}" --user-agent "Mozilla/5.0" ${audioOptions} -o "${tempFile}" "${url}"`;
 
     exec(command, (err, stdout, stderr) => {
       if (err || !fs.existsSync(tempFile)) {
