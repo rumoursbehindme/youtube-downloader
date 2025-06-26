@@ -92,7 +92,7 @@ http://localhost:3000
 
 ## 📸 Screenshots
 
-![Image Not Found](image.png)
+![Image Not Found](public/image.png)
 
 ---
 
