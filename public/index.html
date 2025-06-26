@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>YouTube Downloader</title>
   <style>
     body {
@@ -20,13 +20,17 @@
       margin-bottom: 20px;
     }
 
-    input {
+    input,
+    select {
       width: 400px;
       padding: 12px;
       border-radius: 8px;
       border: none;
       font-size: 16px;
       outline: none;
+      margin-top: 10px;
+      background: #2c2c2c;
+      color: #fff;
     }
 
     button {
@@ -45,40 +49,6 @@
       background: #00e69c;
     }
 
-    select {
-      width: 420px;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-      outline: none;
-      background: #2c2c2c;
-      color: #fff;
-      margin-top: 20px;
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'10'%20height%3D'5'%20viewBox%3D'0%200%2010%205'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20fill%3D'%23fff'%20d%3D'M0%200l5%205%205-5z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    select:hover {
-      background-color: #3a3a3a;
-    }
-
-    option {
-      background: #1a1a1a;
-      color: #fff;
-    }
-
-    #status {
-      margin-top: 20px;
-      font-size: 14px;
-      color: #aaa;
-    }
-
     #thumbnail {
       margin-top: 30px;
       width: 640px;
@@ -86,6 +56,12 @@
       border-radius: 10px;
       display: none;
       box-shadow: 0 0 20px rgba(0, 255, 174, 0.3);
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #aaa;
     }
   </style>
 </head>
@@ -111,20 +87,12 @@
       const url = document.getElementById('url').value;
       const videoId = extractVideoID(url);
       const thumb = document.getElementById('thumbnail');
-      const formatSelect = document.getElementById('format-select');
 
       if (videoId) {
         thumb.src = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
         thumb.style.display = 'block';
-        fetchFormats(url);
       } else {
         thumb.style.display = 'none';
-        formatSelect.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.textContent = 'Enter valid YouTube URL';
-        defaultOption.disabled = true;
-        defaultOption.selected = true;
-        formatSelect.appendChild(defaultOption);
       }
     }
 
@@ -138,7 +106,7 @@
         return;
       }
 
-      status.textContent = 'Downloading... Please wait ⏳';
+      status.textContent = 'Downloading...';
 
       try {
         const res = await fetch('/download', {
@@ -147,10 +115,21 @@
           body: JSON.stringify({ url, format_id: format })
         });
 
-        const data = await res.json();
-        status.textContent = data.message || data.error;
+        const blob = await res.blob();
+        const disposition = res.headers.get('Content-Disposition');
+        const filenameMatch = disposition && disposition.match(/filename="(.+)"/);
+        const filename = filenameMatch ? filenameMatch[1] : 'download';
+
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+
+        URL.revokeObjectURL(link.href);
+        status.textContent = '✅ Download Finished.';
       } catch (err) {
-        status.textContent = 'Something went wrong.';
+        console.error('❌ Error:', err);
+        status.textContent = '❌ Something went wrong.';
       }
     }
   </script>
